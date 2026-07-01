@@ -1,19 +1,19 @@
 # PingPilot
 
-**PingPilot** is a Node.js-based website/URL uptime monitoring tool. It periodically checks the availability of the URLs you're tracking, keeps a history of their status, and emails you when something goes down — all through a simple server-rendered dashboard.
+**PingPilot** is a Node.js-based website and URL uptime monitoring platform. It periodically checks the availability and health of monitored endpoints, maintains response time history, generates public status pages, and sends email alerts whenever an outage or recovery occurs.
 
-> Internally named `uptime-monitor` in `package.json`.
+> Package identifier: `uptime-monitor`
 
 ---
 
 ## ✨ Features
 
-- 🔐 **Google OAuth login** — sign in with your Google account (via Passport.js)
-- 📡 **Scheduled uptime checks** — background cron jobs periodically ping your monitored URLs
-- 📧 **Email alerts** — get notified by email when a monitored site goes down (via Nodemailer)
-- 🗄️ **Persistent storage** — monitor history and user data stored in PostgreSQL
-- 🖥️ **Server-rendered dashboard** — EJS-based views for managing and viewing monitors
-- 🔒 **Session-based auth** — authenticated routes protected via middleware
+- 🔐 **Google OAuth Login** — Secure authentication via Passport.js and Google OAuth 2.0
+- 📡 **Automated Uptime Checks** — Background cron-scheduled ping engine running customizable check intervals
+- 📧 **Instant Email Alerts** — Immediate downtime and recovery notifications powered by Nodemailer
+- 📊 **Status Pages & Analytics** — 30-day uptime percentage calculations, incident history tracking, and response-time visualizations
+- 🖥️ **Server-Rendered UI** — Clean, responsive dashboard built with EJS templates and modern styling
+- 🗄️ **PostgreSQL Storage** — Robust relational storage with automatic migrations for users, monitors, checks, and incidents
 
 ---
 
@@ -21,34 +21,56 @@
 
 | Layer            | Technology                          |
 |-------------------|--------------------------------------|
-| Runtime            | Node.js                             |
-| Web framework      | Express 5                           |
-| Templating         | EJS                                 |
-| Database           | PostgreSQL (`pg`)                   |
-| Auth               | Passport.js + Google OAuth 2.0      |
-| Sessions           | express-session                     |
-| Scheduled jobs     | node-cron                           |
-| HTTP requests      | axios                               |
-| Email notifications| Nodemailer                          |
-| Config             | dotenv                              |
-| Dev tooling        | nodemon                             |
+| Runtime           | Node.js                             |
+| Web Framework     | Express 5                           |
+| Templating (UI)   | EJS                                 |
+| Database          | PostgreSQL (`pg`)                   |
+| Authentication    | Passport.js + Google OAuth 2.0      |
+| Session Store     | Express-Session                     |
+| Scheduler         | Node-Cron                           |
+| HTTP Client       | Axios                               |
+| Email Alerts      | Nodemailer                          |
+| Config & Secrets  | Dotenv                              |
+| Dev Tooling       | Nodemon                             |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-pingpilot/
-├── config/         # App configuration (DB connection, Passport/Google OAuth strategy, etc.)
-├── jobs/           # Scheduled cron jobs (periodic URL/uptime checks)
-├── middleware/      # Express middleware (e.g. auth guards)
-├── models/          # Database models / queries
-├── routes/          # Express route handlers
-├── utils/           # Helper utilities (e.g. email sender, ping logic)
-├── views/           # EJS templates for the dashboard UI
-├── server.js         # App entry point
-├── package.json
-└── .gitignore
+uptime-monitor/
+├── backend/
+│   ├── config/              # PostgreSQL pool, Passport OAuth strategy, and DB migrations
+│   │   ├── db.js
+│   │   ├── migrate.js
+│   │   ├── passport.js
+│   │   └── schema.sql
+│   ├── controllers/         # Future controller abstractions
+│   ├── jobs/                # Background cron worker & ping engine
+│   │   └── monitorScheduler.js
+│   ├── middleware/          # Route guards and authentication middleware
+│   │   └── auth.js
+│   ├── models/              # Database data access layer (checks, incidents, monitors)
+│   │   ├── checkModel.js
+│   │   ├── incidentModel.js
+│   │   └── monitorModel.js
+│   ├── routes/              # Express endpoint routers (auth, monitors)
+│   │   ├── auth.js
+│   │   └── monitors.js
+│   ├── utils/               # Mailer and helper utilities
+│   │   └── mailer.js
+│   └── server.js            # Main backend server implementation
+├── frontend/
+│   ├── public/              # Static frontend assets (styles, scripts, images)
+│   └── views/               # EJS server-rendered templates
+│       ├── dashboard.ejs    # Authenticated user dashboard
+│       ├── landing.ejs      # Public landing page
+│       └── status.ejs       # Public monitor status page
+├── .env.example             # Template for required environment variables
+├── .gitignore               # Ignored files, dependencies, logs, and secrets
+├── package.json             # Scripts, dependencies, and metadata
+├── README.md                # Documentation
+└── server.js                # Root forwarder entry point
 ```
 
 ---
@@ -57,16 +79,16 @@ pingpilot/
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (LTS recommended)
-- A running [PostgreSQL](https://www.postgresql.org/) instance
-- A [Google Cloud OAuth 2.0](https://console.cloud.google.com/apis/credentials) Client ID & Secret
-- An SMTP-capable email account (for Nodemailer alerts)
+- [Node.js](https://nodejs.org/) (v18+ recommended)
+- A running [PostgreSQL](https://www.postgresql.org/) database
+- A [Google Cloud Console](https://console.cloud.google.com/apis/credentials) OAuth 2.0 Client ID & Secret
+- An SMTP-compatible email service (e.g. Gmail App Password)
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/hemanth-gunti/pingpilot.git
-cd pingpilot
+git clone <your-github-repo-url>
+cd uptime-monitor
 ```
 
 ### 2. Install dependencies
@@ -77,81 +99,67 @@ npm install
 
 ### 3. Configure environment variables
 
-Create a `.env` file in the project root:
+Copy the sample environment file to create your local `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Fill in your actual environment values:
 
 ```env
-# Server
+# Server Configuration
 PORT=3000
-SESSION_SECRET=your_session_secret
+SESSION_SECRET=your_super_secret_session_key
 
-# Database
-DATABASE_URL=postgres://user:password@localhost:5432/pingpilot
+# PostgreSQL Database Connection URL
+DATABASE_URL=postgresql://postgres:password@localhost:5432/uptime_monitor
 
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
+# Google OAuth 2.0 Credentials
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
 
-# Email (Nodemailer)
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=your_email@example.com
-SMTP_PASS=your_email_password
-ALERT_EMAIL_FROM=alerts@example.com
+# Email Alerts (Nodemailer via Gmail SMTP)
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_gmail_app_password
+ALERT_TO=alerts_recipient@gmail.com
 ```
 
-> ⚠️ Adjust variable names above to match what's referenced in `config/` and `utils/` — update this section once you confirm the exact keys used in code.
+> ⚠️ Never commit your `.env` file to version control. It is already excluded in `.gitignore`.
 
-### 4. Set up the database
+### 4. Run database migrations
 
-Make sure your PostgreSQL instance is running and the database referenced in `DATABASE_URL` exists. Run any schema/migration setup your `models/` expect.
-
-### 5. Run the app
+Prepare your PostgreSQL tables (`users`, `monitors`, `checks`, `incidents`):
 
 ```bash
-# development (auto-restarts on file changes)
+npm run migrate
+```
+
+### 5. Start the application
+
+```bash
+# Development (with nodemon auto-restart)
 npm run dev
 
-# production
+# Production
 npm start
 ```
 
-The app will be available at `http://localhost:3000` (or your configured `PORT`).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
 ## 🔄 How It Works
 
-1. A logged-in user adds a URL they want to monitor.
-2. A **node-cron** job in `jobs/` runs on a schedule, pinging each monitored URL with `axios`.
-3. The result (up/down, response time, status code) is recorded via the models layer in PostgreSQL.
-4. If a monitored URL is detected as down, **Nodemailer** sends an alert email to the user.
-5. The dashboard (EJS views) displays current status and history for all monitored URLs.
-
----
-
-## 📌 Roadmap Ideas
-
-- [ ] Response-time charts / uptime history graphs
-- [ ] Configurable check intervals per monitor
-- [ ] Multi-channel alerts (Slack, Discord, SMS)
-- [ ] Public status page per user/team
-- [ ] API endpoints for programmatic monitor management
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome. Feel free to open a pull request or an issue.
+1. **Authentication**: Users sign in with their Google account via Passport.js. User sessions are persisted securely in cookies.
+2. **Scheduling**: A background `node-cron` scheduler periodically selects active monitors and checks their HTTP response using `axios`.
+3. **Telemetry**: Each ping records status code, latency, and error message to PostgreSQL.
+4. **Alerts**: If a monitor goes down, an incident is opened and an immediate alert email is dispatched via Nodemailer. Once recovered, a resolution email with total downtime duration is sent.
+5. **Status Pages**: Users and external visitors can view public status pages displaying 30-day uptime percentage, uptime charts, response time trends, and incident histories.
 
 ---
 
 ## 📄 License
 
-ISC (as declared in `package.json`) — update this section if a different license applies.
-
----
-
-## 👤 Author
-
-**Hemanth Gunti** — [@hemanth-gunti](https://github.com/hemanth-gunti)
+ISC
