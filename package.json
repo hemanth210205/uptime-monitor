@@ -16,7 +16,7 @@
     "express",
     "ejs"
   ],
-  "author": "",
+  "author": "Hemanth (hemanth210205)",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
