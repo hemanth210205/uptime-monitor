@@ -1,4 +1,4 @@
-# PingPilot 🚀
+# Uptime-monitor 🚀
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-68a063?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-5.x-black?style=flat-square&logo=express)](https://expressjs.com/)
@@ -6,7 +6,7 @@
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg?style=flat-square)](https://opensource.org/licenses/ISC)
 [![Maintained](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg?style=flat-square)]()
 
-**PingPilot** is a production-ready, full-stack website and URL uptime monitoring platform. It continuously evaluates the availability, response time, and HTTP status codes of target endpoints. When an incident or service interruption is detected, PingPilot logs the root cause, initiates an incident record, and dispatches real-time email alerts — automatically notifying you again once service is restored with the full downtime duration.
+**Uptime-monitor** is a production-ready, full-stack website and URL uptime monitoring platform. It continuously evaluates the availability, response time, and HTTP status codes of target endpoints. When an incident or service interruption is detected, PingPilot logs the root cause, initiates an incident record, and dispatches real-time email alerts — automatically notifying you again once service is restored with the full downtime duration.
 
 > Package identifier: `uptime-monitor`
 
